@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CMTVPT iframe auto-reload</title>
+<title>CMTVPT iframe no reload</title>
 <style>
 html,
 body {
@@ -30,121 +30,20 @@ body {
     border: 0;
     background: #000;
 }
-
-.stream-frame.hidden {
-    opacity: 0;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.stream-frame.active {
-    opacity: 1;
-    pointer-events: auto;
-    z-index: 2;
-}
 </style>
 </head>
 <body>
 
 <div id="player">
     <iframe
-        id="frameA"
-        class="stream-frame active"
-        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-        allowfullscreen
-        referrerpolicy="no-referrer">
-    </iframe>
-
-    <iframe
-        id="frameB"
-        class="stream-frame hidden"
+        id="streamFrame"
+        class="stream-frame"
+        src="https://popcdn.day/player.php?stream=CMTVPT"
         allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
         allowfullscreen
         referrerpolicy="no-referrer">
     </iframe>
 </div>
-
-<script>
-(() => {
-    const STREAM_URL = "https://popcdn.day/player.php?stream=CMTVPT";
-
-    const CONFIG = {
-        reloadEveryMs: 120000,
-        loadTimeoutMs: 15000,
-        cacheBusterName: "_reload"
-    };
-
-    const frames = [
-        document.getElementById("frameA"),
-        document.getElementById("frameB")
-    ];
-
-    let activeIndex = 0;
-    let reloadTimer = null;
-    let loadTimeout = null;
-
-    function buildUrl() {
-        const separator = STREAM_URL.includes("?") ? "&" : "?";
-        return STREAM_URL + separator + CONFIG.cacheBusterName + "=" + Date.now();
-    }
-
-    function showFrame(index) {
-        frames.forEach((frame, frameIndex) => {
-            frame.classList.toggle("active", frameIndex === index);
-            frame.classList.toggle("hidden", frameIndex !== index);
-        });
-        activeIndex = index;
-    }
-
-    function clearLoadTimeout() {
-        if (loadTimeout) {
-            clearTimeout(loadTimeout);
-            loadTimeout = null;
-        }
-    }
-
-    function scheduleReload() {
-        if (reloadTimer) {
-            clearTimeout(reloadTimer);
-        }
-
-        reloadTimer = setTimeout(() => {
-            reloadInvisible();
-        }, CONFIG.reloadEveryMs);
-    }
-
-    function reloadInvisible() {
-        clearLoadTimeout();
-
-        const hiddenIndex = activeIndex === 0 ? 1 : 0;
-        const hiddenFrame = frames[hiddenIndex];
-
-        hiddenFrame.onload = () => {
-            clearLoadTimeout();
-            showFrame(hiddenIndex);
-            frames[activeIndex === 0 ? 1 : 0].removeAttribute("src");
-            scheduleReload();
-        };
-
-        loadTimeout = setTimeout(() => {
-            hiddenFrame.onload = null;
-            hiddenFrame.removeAttribute("src");
-            scheduleReload();
-        }, CONFIG.loadTimeoutMs);
-
-        hiddenFrame.src = buildUrl();
-    }
-
-    document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) {
-            reloadInvisible();
-        }
-    });
-
-    frames[activeIndex].src = buildUrl();
-    scheduleReload();
-})();
-</script>
 
 </body>
 </html>
