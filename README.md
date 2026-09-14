@@ -1,8 +1,7 @@
-# CMTVPT GitHub Player
+# CMTVPT Vercel Test
 
-Lecteur CMTVPT autonome publié avec GitHub Pages.
+Branche expérimentale avec une Vercel Function qui extrait le master signé depuis `amazingtier.top`.
 
-La page intègre directement `https://amazingtier.top/player/CMTVPT`. Le lecteur distant gère son token et son renouvellement : aucun PC, aucune extension Chrome et aucune tâche planifiée ne sont nécessaires.
+Le lecteur appelle `/api/stream` toutes les deux minutes. Aucun token n'est enregistré dans le dépôt ou dans Vercel.
 
-Page publique : <https://gardien9a13ruedechartres-netizen.github.io/cmtv-chrome/>
-
+La branche `main` conserve le lecteur GitHub Pages fonctionnel tant que ce test Vercel n'est pas validé.
