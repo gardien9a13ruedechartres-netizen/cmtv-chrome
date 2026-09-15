@@ -18,6 +18,8 @@
     'v-plus-tvi': 'vplustvi', record: 'recordeuropa', sicnoticias: 'sic-noticias',
     tcvint: 'tcv-int', cnnpt: 'cnn-pt', 'cnn-portugal': 'cnn-pt'
   });
+  const NORMAL_REFRESH_MS = 120000;
+  const RETRY_DELAYS_MS = [2000, 5000, 10000, 20000, 30000, 60000];
 
   const video = document.getElementById('video');
   const panel = document.getElementById('panel');
@@ -25,6 +27,11 @@
   const playButton = document.getElementById('play');
   let hls = null;
   let currentUrl = '';
+  let refreshPromise = null;
+  let retryTimer = null;
+  let retryAttempt = 0;
+  let panelTimer = null;
+
   const requested = new URLSearchParams(location.search).get('channel') || 'cmtvpt';
   const normalized = requested.trim().toLowerCase();
   const channel = CHANNEL_ALIASES[normalized] || normalized;
@@ -37,8 +44,31 @@
   document.title = `${channel.toUpperCase()} — TV en direct`;
 
   function show(message) {
+    if (panelTimer) clearTimeout(panelTimer);
     status.textContent = message;
     panel.classList.remove('hidden');
+  }
+
+  function hidePanelSoon() {
+    if (panelTimer) clearTimeout(panelTimer);
+    panelTimer = setTimeout(() => panel.classList.add('hidden'), 1500);
+  }
+
+  function resetRecovery() {
+    retryAttempt = 0;
+    if (retryTimer) clearTimeout(retryTimer);
+    retryTimer = null;
+  }
+
+  function scheduleRecovery() {
+    if (retryTimer) return;
+    const delay = RETRY_DELAYS_MS[Math.min(retryAttempt, RETRY_DELAYS_MS.length - 1)];
+    retryAttempt += 1;
+    show(`Reconnexion dans ${Math.ceil(delay / 1000)} s…`);
+    retryTimer = setTimeout(() => {
+      retryTimer = null;
+      refresh(true);
+    }, delay);
   }
 
   async function play() {
@@ -50,25 +80,37 @@
     }
   }
 
-  async function refresh() {
+  function ensureHls() {
+    if (hls) return hls;
+    hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      resetRecovery();
+      play();
+    });
+    hls.on(Hls.Events.ERROR, (_event, details) => {
+      if (!details?.fatal) return;
+      if (details.type === Hls.ErrorTypes.MEDIA_ERROR) {
+        hls.recoverMediaError();
+      } else if (details.type === Hls.ErrorTypes.NETWORK_ERROR) {
+        hls.startLoad();
+      }
+      scheduleRecovery();
+    });
+    return hls;
+  }
+
+  async function doRefresh(forceReload = false) {
     try {
       if (!apiPath) throw new Error(`Chaîne inconnue : ${requested}`);
       const response = await fetch(apiPath, { cache: 'no-store' });
       const data = await response.json();
       if (!response.ok || !data.url) throw new Error(data.error || 'Flux indisponible');
 
-      if (data.url !== currentUrl) {
+      if (forceReload || data.url !== currentUrl) {
         currentUrl = data.url;
         if (window.Hls && Hls.isSupported()) {
-          if (!hls) {
-            hls = new Hls({ enableWorker: true, lowLatencyMode: true });
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, play);
-            hls.on(Hls.Events.ERROR, (_event, details) => {
-              if (details && details.fatal) show('Erreur HLS, nouvelle tentative en cours…');
-            });
-          }
-          hls.loadSource(currentUrl);
+          ensureHls().loadSource(currentUrl);
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
           video.src = currentUrl;
           await play();
@@ -77,13 +119,28 @@
         }
       }
       show('Flux actualisé avec succès.');
-      setTimeout(() => panel.classList.add('hidden'), 1500);
+      hidePanelSoon();
     } catch (error) {
-      show(error instanceof Error ? error.message : 'Flux indisponible');
+      if (video.readyState < 2) {
+        show(error instanceof Error ? error.message : 'Flux indisponible');
+      }
+      scheduleRecovery();
     }
   }
 
+  function refresh(forceReload = false) {
+    if (refreshPromise) return refreshPromise;
+    refreshPromise = doRefresh(forceReload).finally(() => {
+      refreshPromise = null;
+    });
+    return refreshPromise;
+  }
+
   playButton.addEventListener('click', play);
+  video.addEventListener('playing', resetRecovery);
+  video.addEventListener('error', scheduleRecovery);
+  video.addEventListener('stalled', scheduleRecovery);
+  window.addEventListener('online', () => refresh(true));
   refresh();
-  setInterval(refresh, 120000);
+  setInterval(refresh, NORMAL_REFRESH_MS);
 })();
