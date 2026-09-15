@@ -5,9 +5,11 @@
     'sic-noticias', 'tcv-int', 'cnn-pt'
   ]);
   const WIDEIPTV_CHANNELS = new Set([
-    'tf1fr', 'beinsport1fr', 'beinsport2fr', 'beinsport3fr', 'sptplus',
-    'footplusfr', 'euro1pt', 'euro2pt', 'abola', 'sporting', 'portocanal',
-    'canal11', 'm6fr', 'cnewsfr', 'canals360', 'euro1fr', 'euro2fr',
+    'btv1', 'tf1fr', 'canalplfr', 'beinsport1fr', 'beinsport2fr',
+    'beinsport3fr', 'sptplus', 'spt1', 'spt2', 'spt3', 'spt4', 'spt5',
+    'footplusfr', 'euro1pt', 'euro2pt', 'abola', 'eleven1', 'eleven2',
+    'eleven3', 'eleven4', 'eleven5', 'sporting', 'portocanal', 'canal11',
+    'm6fr', 'cnewsfr', 'canals360', 'canalsportfr', 'euro1fr', 'euro2fr',
     'rmcsport1fr', 'rmcsport2fr', 'er1fr', 'canalpldocs'
   ]);
   const CHANNEL_ALIASES = Object.freeze({
