@@ -48,7 +48,7 @@ function jsonResponse(body, status = 200) {
 }
 
 function resolveChannel(value) {
-  const key = String(value || '').trim().toLowerCase();
+  const key = String(value || 'cmtvpt').trim().toLowerCase();
   return CHANNEL_ALIASES[key] || '';
 }
 
