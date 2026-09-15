@@ -1,10 +1,38 @@
 (() => {
+  const AMAZINGTIER_CHANNELS = new Set([
+    'cmtvpt', 'rtp1', 'rtp2', 'rtpafrica', 'rtp3', 'tvi', 'tvi-int',
+    'tvireality', 'tvi-ficcao', 'vplustvi', 'recordeuropa', 'sic',
+    'sic-noticias', 'tcv-int', 'cnn-pt'
+  ]);
+  const WIDEIPTV_CHANNELS = new Set([
+    'tf1fr', 'beinsport1fr', 'beinsport2fr', 'beinsport3fr', 'sptplus',
+    'footplusfr', 'euro1pt', 'euro2pt', 'abola', 'sporting', 'portocanal',
+    'canal11', 'm6fr', 'cnewsfr', 'canals360', 'euro1fr', 'euro2fr',
+    'rmcsport1fr', 'rmcsport2fr', 'er1fr', 'canalpldocs'
+  ]);
+  const CHANNEL_ALIASES = Object.freeze({
+    cmtv: 'cmtvpt', rtpa: 'rtpafrica', 'rtp-africa': 'rtpafrica',
+    'tvi-reality': 'tvireality', tvificcao: 'tvi-ficcao', tvi_ficcao: 'tvi-ficcao',
+    'v-plus-tvi': 'vplustvi', record: 'recordeuropa', sicnoticias: 'sic-noticias',
+    tcvint: 'tcv-int', cnnpt: 'cnn-pt', 'cnn-portugal': 'cnn-pt'
+  });
+
   const video = document.getElementById('video');
   const panel = document.getElementById('panel');
   const status = document.getElementById('status');
   const playButton = document.getElementById('play');
   let hls = null;
   let currentUrl = '';
+  const requested = new URLSearchParams(location.search).get('channel') || 'cmtvpt';
+  const normalized = requested.trim().toLowerCase();
+  const channel = CHANNEL_ALIASES[normalized] || normalized;
+  const apiPath = AMAZINGTIER_CHANNELS.has(channel)
+    ? `/api/stream?channel=${encodeURIComponent(channel)}`
+    : WIDEIPTV_CHANNELS.has(channel)
+      ? `/api/wideiptv?channel=${encodeURIComponent(channel)}`
+      : '';
+
+  document.title = `${channel.toUpperCase()} — TV en direct`;
 
   function show(message) {
     status.textContent = message;
@@ -22,7 +50,8 @@
 
   async function refresh() {
     try {
-      const response = await fetch('/api/stream', { cache: 'no-store' });
+      if (!apiPath) throw new Error(`Chaîne inconnue : ${requested}`);
+      const response = await fetch(apiPath, { cache: 'no-store' });
       const data = await response.json();
       if (!response.ok || !data.url) throw new Error(data.error || 'Flux indisponible');
 
@@ -56,4 +85,3 @@
   refresh();
   setInterval(refresh, 120000);
 })();
-
