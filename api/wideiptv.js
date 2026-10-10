@@ -1,5 +1,5 @@
 const WIDEIPTV_ORIGIN = 'https://wideiptv.top';
-const DEFAULT_STREAM_HOST = 'ds164.bluetier.top';
+const STREAM_HOST_PATTERN = /^ds\d+\.bluetier\.top$/i;
 const REFRESH_URL = `${WIDEIPTV_ORIGIN}/api/refresh_token.php`;
 const MAX_SOURCE_SIZE = 1_000_000;
 
@@ -75,7 +75,10 @@ function parseStreamUrl(html, channel) {
   const pathParts = url.pathname.split('/').filter(Boolean);
   if (
     url.protocol !== 'https:' ||
-    url.hostname !== DEFAULT_STREAM_HOST ||
+    !STREAM_HOST_PATTERN.test(url.hostname) ||
+    url.port !== '' ||
+    url.username !== '' ||
+    url.password !== '' ||
     pathParts.length !== 2 ||
     pathParts[0].toLowerCase() !== channel.toLowerCase() ||
     pathParts[1].toLowerCase() !== 'index.m3u8' ||
