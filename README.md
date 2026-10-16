@@ -1,9 +1,9 @@
-# CMTVPT Vercel Test
+# Lecteur Vercel AmazingTier et WideIPTV
 
-Branche expérimentale avec une Vercel Function qui extrait le master signé depuis `amazingtier.top`.
+AmazingTier utilise le lecteur officiel dans une iframe avec `sandbox="allow-scripts allow-forms"`. Les pop-ups, téléchargements et navigations de la page principale ne sont pas autorisés. Ce sandbox ne garantit pas de supprimer les publicités affichées à l’intérieur de la vidéo ou du lecteur. Le fournisseur gère le renouvellement des flux : aucun PC local ni extension ne sont nécessaires.
 
-Le lecteur appelle `/api/stream` toutes les deux minutes. Aucun token n'est enregistré dans le dépôt ou dans Vercel.
+WideIPTV conserve le lecteur HLS et `/api/wideiptv`. L’ancien `/api/stream` AmazingTier reste présent pour compatibilité, mais les pages AmazingTier ne l’appellent plus : la récupération serveur reçoit actuellement un défi Cloudflare.
 
-La branche `main` conserve le lecteur GitHub Pages fonctionnel tant que ce test Vercel n'est pas validé.
+Exemple : https://cmtv-chrome-publish.vercel.app/?channel=cmtv
 
-Déploiement Vercel validé : <https://cmtv-chrome-publish.vercel.app/>
+Validation : `node --test`, correspondance des15chaînes et sandbox ; lecture réelle Chrome vérifiée pour CMTV, RTP1 et TVI.

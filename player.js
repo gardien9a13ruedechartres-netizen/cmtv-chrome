@@ -1,4 +1,10 @@
 (() => {
+  const AMAZINGTIER_PLAYER_CHANNELS = Object.freeze({
+    cmtvpt: 'CMTVPT', rtp1: 'RTP1', rtp2: 'RTP2', rtpafrica: 'RTPAfrica',
+    rtp3: 'RTP3', tvi: 'TVI', 'tvi-int': 'TVI-INT', tvireality: 'TVIReality',
+    'tvi-ficcao': 'TVI_Ficcao', vplustvi: 'VPlusTVI', recordeuropa: 'RecordEuropa',
+    sic: 'SIC', 'sic-noticias': 'SIC-NOTICIAS', 'tcv-int': 'TCV-INT', 'cnn-pt': 'CNN-PT'
+  });
   const AMAZINGTIER_CHANNELS = new Set([
     'cmtvpt', 'rtp1', 'rtp2', 'rtpafrica', 'rtp3', 'tvi', 'tvi-int',
     'tvireality', 'tvi-ficcao', 'vplustvi', 'recordeuropa', 'sic',
@@ -42,6 +48,20 @@
       : '';
 
   document.title = `${channel.toUpperCase()} — TV en direct`;
+
+  if (AMAZINGTIER_CHANNELS.has(channel)) {
+    const frame = document.createElement('iframe');
+    frame.title = `${channel.toUpperCase()} — AmazingTier`;
+    frame.setAttribute('sandbox', 'allow-scripts allow-forms');
+    frame.setAttribute('allow', 'autoplay; encrypted-media; fullscreen; picture-in-picture');
+    frame.setAttribute('allowfullscreen', '');
+    frame.referrerPolicy = 'no-referrer';
+    frame.src = `https://amazingtier.top/player/${encodeURIComponent(AMAZINGTIER_PLAYER_CHANNELS[channel])}`;
+    video.hidden = true;
+    panel.classList.add('hidden');
+    document.querySelector('main').appendChild(frame);
+    return;
+  }
 
   function show(message) {
     if (panelTimer) clearTimeout(panelTimer);
