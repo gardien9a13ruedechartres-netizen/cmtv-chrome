@@ -7,3 +7,5 @@ WideIPTV conserve le lecteur HLS et `/api/wideiptv`. L’ancien `/api/stream` Am
 Exemple : https://cmtv-chrome-publish.vercel.app/?channel=cmtv
 
 Validation : `node --test`, correspondance des15chaînes et sandbox ; lecture réelle Chrome vérifiée pour CMTV, RTP1 et TVI.
+
+WideIPTV : les 34 chaines utilisent le lecteur officiel dans une iframe sandbox=allow-scripts allow-forms. Popups, navigation principale et same-origin ne sont pas autorises. /api/wideiptv reste disponible pour compatibilite, mais le lecteur ne l'utilise plus. Aucune dependance au PC ou a une extension.

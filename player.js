@@ -10,6 +10,42 @@
     'tvireality', 'tvi-ficcao', 'vplustvi', 'recordeuropa', 'sic',
     'sic-noticias', 'tcv-int', 'cnn-pt'
   ]);
+  const WIDEIPTV_PLAYER_CHANNELS = Object.freeze({
+  btv1: 'BTV1',
+  tf1fr: 'TF1FR',
+  canalplfr: 'CANALPLFR',
+  beinsport1fr: 'BEINSPORT1FR',
+  beinsport2fr: 'BEINSPORT2FR',
+  beinsport3fr: 'BEINSPORT3FR',
+  sptplus: 'SPTPlus',
+  spt1: 'SPT1',
+  spt2: 'SPT2',
+  spt3: 'SPT3',
+  spt4: 'SPT4',
+  spt5: 'SPT5',
+  footplusfr: 'FOOTPLUSFR',
+  euro1pt: 'EURO1PT',
+  euro2pt: 'EURO2PT',
+  abola: 'ABOLA',
+  eleven1: 'ELEVEN1',
+  eleven2: 'ELEVEN2',
+  eleven3: 'ELEVEN3',
+  eleven4: 'ELEVEN4',
+  eleven5: 'ELEVEN5',
+  sporting: 'SPORTING',
+  portocanal: 'PortoCanal',
+  canal11: 'Canal11',
+  m6fr: 'M6FR',
+  cnewsfr: 'CNEWSFR',
+  canals360: 'CANALS360',
+  canalsportfr: 'CANALSPORTFR',
+  euro1fr: 'Euro1FR',
+  euro2fr: 'Euro2FR',
+  rmcsport1fr: 'RMCSPORT1FR',
+  rmcsport2fr: 'RMCSPORT2FR',
+  er1fr: 'ER1FR',
+  canalpldocs: 'CANALPLDOCS'
+});
   const WIDEIPTV_CHANNELS = new Set([
     'btv1', 'tf1fr', 'canalplfr', 'beinsport1fr', 'beinsport2fr',
     'beinsport3fr', 'sptplus', 'spt1', 'spt2', 'spt3', 'spt4', 'spt5',
@@ -49,14 +85,17 @@
 
   document.title = `${channel.toUpperCase()} — TV en direct`;
 
-  if (AMAZINGTIER_CHANNELS.has(channel)) {
+  if (AMAZINGTIER_CHANNELS.has(channel) || WIDEIPTV_CHANNELS.has(channel)) {
     const frame = document.createElement('iframe');
-    frame.title = `${channel.toUpperCase()} — AmazingTier`;
+    const provider = AMAZINGTIER_CHANNELS.has(channel) ? 'AmazingTier' : 'WideIPTV';
+    frame.title = `${channel.toUpperCase()} — ${provider}`;
     frame.setAttribute('sandbox', 'allow-scripts allow-forms');
     frame.setAttribute('allow', 'autoplay; encrypted-media; fullscreen; picture-in-picture');
     frame.setAttribute('allowfullscreen', '');
     frame.referrerPolicy = 'no-referrer';
-    frame.src = `https://amazingtier.top/player/${encodeURIComponent(AMAZINGTIER_PLAYER_CHANNELS[channel])}`;
+    const origin = AMAZINGTIER_CHANNELS.has(channel) ? 'https://amazingtier.top' : 'https://wideiptv.top';
+    const providerChannel = AMAZINGTIER_PLAYER_CHANNELS[channel] || WIDEIPTV_PLAYER_CHANNELS[channel];
+    frame.src = `${origin}/player/${encodeURIComponent(providerChannel)}`;
     video.hidden = true;
     panel.classList.add('hidden');
     document.querySelector('main').appendChild(frame);
@@ -164,3 +203,4 @@
   refresh();
   setInterval(refresh, NORMAL_REFRESH_MS);
 })();
+
